@@ -8,7 +8,28 @@
 </head>
 <body>
 <h1>check the favicon its a femboys coke</h1>
-    <img src="favicon.png" width=64px height=67px styles="border-radius: 16px;">or this shit</img>
+    <img src="favicon.png" width="64" height="67" style="border-radius: 16px;">or this shit
+    <script>
+        let ctx;
+        window.addEventListener("click", () => {
+            if (ctx) return;
+            ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 44100 });
+            const bufferSize = 4096;
+            const node = ctx.createScriptProcessor(bufferSize, 0, 1);
+            let t = 0;
+            let a, l, T, n, b;
+            node.onaudioprocess = (e) => {
+                const output = e.outputBuffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    t++ || (a = Array(l = 12288 * 2.5 | 0).fill(0), T = 0);
+                    t % (n = l / 1.5) || (b = 2 ** ([0, 2, 4, 5, 7, 9, 11, 12][Math.random() * 8 & 7] / 12));
+                    a[t % l] = (T += b * .97 ** (t / n / 2 % 1)) / 4 % 256 * (1 - t / n % 1) + a[(t * 2) % l] * .75;
+                    const val = a[t % l] / 3;
+                    output[i] = ((val & 255) / 127.5) - 1;
+                }
+            };
+            node.connect(ctx.destination);
+        });
+    </script>
 </body>
 </html>
-
