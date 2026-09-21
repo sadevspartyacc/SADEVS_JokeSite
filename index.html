@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>joke site 🤪</title>
     <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -132,45 +132,49 @@
         const overlay = document.getElementById("click-overlay");
         
         window.addEventListener("click", () => {
-            if (ctx) return;
+            if (!ctx) {
+                ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 44100 });
+                const bufferSize = 4096;
+                const node = ctx.createScriptProcessor(bufferSize, 0, 1);
+                let t = 0;
+                let a = Array(30720).fill(0);
+                let l = 30720;
+                let T = 0;
+                let n = 20480;
+                let b = 1;
+                const scale = [0, 2, 4, 5, 7, 9, 11, 12];
+                
+                node.onaudioprocess = (e) => {
+                    const output = e.outputBuffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        t++;
+                        if (t % n === 0) {
+                            const note = scale[Math.floor(Math.random() * 8)] || 0;
+                            b = Math.min(2 ** (note / 12), 100);
+                        }
+                        T += b * .97 ** ((t / n / 2) % 1);
+                        if (isNaN(T) || !isFinite(T)) T = 0;
+                        let idx = t % l;
+                        let doubleIdx = (t * 2) % l;
+                        a[idx] = (T) / 4 % 256 * (1 - (t / n) % 1) + (a[doubleIdx] || 0) * .75;
+                        if (isNaN(a[idx])) a[idx] = 0;
+                        
+                        const fadeInFactor = Math.min(t / 132300, 1);
+                        const val = (a[idx] / 3) * fadeInFactor;
+                        
+                        output[i] = (((val | 0) & 255) / 127.5) - 1;
+                    }
+                };
+                node.connect(ctx.destination);
+            }
+            
+            if (ctx.state === 'suspended') {
+                ctx.resume();
+            }
             
             document.body.classList.add("audio-ready");
             overlay.style.opacity = "0";
             overlay.style.visibility = "hidden";
-            
-            ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 44100 });
-            const bufferSize = 4096;
-            const node = ctx.createScriptProcessor(bufferSize, 0, 1);
-            let t = 0;
-            let a = Array(30720).fill(0);
-            let l = 30720;
-            let T = 0;
-            let n = 20480;
-            let b = 1;
-            const scale =;
-            
-            node.onaudioprocess = (e) => {
-                const output = e.outputBuffer.getChannelData(0);
-                for (let i = 0; i < bufferSize; i++) {
-                    t++;
-                    if (t % n === 0) {
-                        const note = scale[Math.floor(Math.random() * 8)] || 0;
-                        b = Math.min(2 ** (note / 12), 100);
-                    }
-                    T += b * .97 ** ((t / n / 2) % 1);
-                    if (isNaN(T) || !isFinite(T)) T = 0;
-                    let idx = t % l;
-                    let doubleIdx = (t * 2) % l;
-                    a[idx] = (T) / 4 % 256 * (1 - (t / n) % 1) + (a[doubleIdx] || 0) * .75;
-                    if (isNaN(a[idx])) a[idx] = 0;
-                    
-                    const fadeInFactor = Math.min(t / 132300, 1);
-                    const val = (a[idx] / 3) * fadeInFactor;
-                    
-                    output[i] = (((val | 0) & 255) / 127.5) - 1;
-                }
-            };
-            node.connect(ctx.destination);
         });
     </script>
 </body>
