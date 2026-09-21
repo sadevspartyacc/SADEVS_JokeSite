@@ -166,10 +166,10 @@
                         lastSynthVal = (lastSynthVal * 0.85) + (rawSynth * 0.15);
                         const lowpassSynth = lastSynthVal * 0.35 * fadeInFactor;
                         
-                        const drumInterval = n;
+                        const drumInterval = n * 2;
                         const drumT = t % drumInterval;
                         const drumDecay = Math.max(0, 1 - (drumT / (drumInterval * 0.9)));
-                        const drumPitch = Math.exp(-drumT / 2400) * 0.125;
+                        const drumPitch = Math.exp(-drumT / 4800) * 0.0625;
                         const drumWave = Math.sin(drumT * drumPitch) * 20 * drumDecay * fadeInFactor;
                         
                         let mixedSignal = (lowpassSynth + drumWave) / 128;
