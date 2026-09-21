@@ -5,28 +5,162 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>joke site 🤪</title>
     <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Ubuntu', sans-serif;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(-45deg, #0f0c20, #150734, #0b1b3d, #1f0b35);
+            background-size: 400% 400%;
+            animation: gradientFlow 15s ease infinite;
+            overflow: hidden;
+            text-align: center;
+        }
+        @keyframes gradientFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        #click-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 5, 25, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            cursor: pointer;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        .reminder-box {
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .pulse-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            animation: pulse 1.5s infinite alternate;
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.98); opacity: 0.6; text-shadow: 0 0 10px rgba(147, 51, 234, 0); }
+            100% { transform: scale(1.02); opacity: 1; text-shadow: 0 0 20px rgba(147, 51, 234, 0.8); }
+        }
+        .container {
+            max-width: 600px;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.8s ease;
+        }
+        body.audio-ready .container {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+            font-weight: 700;
+            background: linear-gradient(to right, #ffffff, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .content-flex {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            font-size: 1.2rem;
+            color: #e2e8f0;
+        }
+        img {
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(192, 132, 252, 0.4);
+            transition: transform 0.3s ease;
+        }
+        img:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+    </style>
 </head>
 <body>
-<h1>check the favicon its a femboys coke</h1>
-    <img src="favicon.png" width="64" height="67" style="border-radius: 16px;">or this shit
+
+    <div id="click-overlay">
+        <div class="reminder-box">
+            <div class="pulse-text">👉 CLICK ANYWHERE TO ENTER & START AUDIO 🚀</div>
+        </div>
+    </div>
+
+    <div class="container">
+        <h1>check the favicon its a femboys coke</h1>
+        <div class="content-flex">
+            <img src="favicon.png" width="64" height="67">
+            <span>or this shit</span>
+        </div>
+    </div>
+
     <script>
         let ctx;
+        const overlay = document.getElementById("click-overlay");
+        
         window.addEventListener("click", () => {
             if (ctx) return;
+            
+            document.body.classList.add("audio-ready");
+            overlay.style.opacity = "0";
+            overlay.style.visibility = "hidden";
+            
             ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 44100 });
             const bufferSize = 4096;
             const node = ctx.createScriptProcessor(bufferSize, 0, 1);
             let t = 0;
-            let a, l, T, n, b;
+            let a = Array(30720).fill(0);
+            let l = 30720;
+            let T = 0;
+            let n = 20480;
+            let b = 1;
             const scale = [0, 2, 4, 5, 7, 9, 11, 12];
+            
             node.onaudioprocess = (e) => {
                 const output = e.outputBuffer.getChannelData(0);
                 for (let i = 0; i < bufferSize; i++) {
-                    t++ || (a = Array(l = 12288 * 2.5 | 0).fill(0), T = 0);
-                    t % (n = l / 1.5) || (b = 2 ** (scale[Math.random() * 8 & 7] / 12));
-                    a[t % l] = (T += b * .97 ** (t / n / 2 % 1)) / 4 % 256 * (1 - t / n % 1) + a[(t * 2) % l] * .75;
-                    const val = a[t % l] / 3;
-                    output[i] = ((val & 255) / 127.5) - 1;
+                    t++;
+                    if (t % n === 0) {
+                        const note = scale[Math.floor(Math.random() * 8)] || 0;
+                        b = Math.min(2 ** (note / 12), 100);
+                    }
+                    T += b * .97 ** ((t / n / 2) % 1);
+                    if (isNaN(T) || !isFinite(T)) T = 0;
+                    let idx = t % l;
+                    let doubleIdx = (t * 2) % l;
+                    a[idx] = (T) / 4 % 256 * (1 - (t / n) % 1) + (a[doubleIdx] || 0) * .75;
+                    if (isNaN(a[idx])) a[idx] = 0;
+                    const val = a[idx] / 3;
+                    output[i] = (((val | 0) & 255) / 127.5) - 1;
                 }
             };
             node.connect(ctx.destination);
