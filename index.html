@@ -142,7 +142,8 @@
                 let T = 0;
                 let n = 20480;
                 let b = 1;
-                const scale = [0, 2, 4, 5, 7, 9, 11, 12];
+                let lastSynthVal = 0;
+                const scale =;
                 
                 node.onaudioprocess = (e) => {
                     const output = e.outputBuffer.getChannelData(0);
@@ -160,19 +161,23 @@
                         if (isNaN(a[idx])) a[idx] = 0;
                         
                         const fadeInFactor = Math.min(t / 132300, 1);
-                        const synthVal = (a[idx] / 3) * fadeInFactor;
+                        const rawSynth = ((a[idx] / 3) & 255) - 128;
                         
-                        const drumInterval = n / 2;
+                        lastSynthVal = (lastSynthVal * 0.85) + (rawSynth * 0.15);
+                        const lowpassSynth = lastSynthVal * 0.35 * fadeInFactor;
+                        
+                        const drumInterval = n;
                         const drumT = t % drumInterval;
-                        const drumDecay = Math.max(0, 1 - (drumT / (drumInterval * 0.8)));
-                        const drumPitch = Math.exp(-drumT / 1200) * 0.25;
-                        const drumWave = Math.sin(drumT * drumPitch) * 45 * drumDecay * fadeInFactor;
+                        const drumDecay = Math.max(0, 1 - (drumT / (drumInterval * 0.9)));
+                        const drumPitch = Math.exp(-drumT / 2400) * 0.125;
+                        const drumWave = Math.sin(drumT * drumPitch) * 20 * drumDecay * fadeInFactor;
                         
-                        let mixedVal = synthVal + drumWave;
-                        if (mixedVal > 127) mixedVal = 127;
-                        if (mixedVal < -128) mixedVal = -128;
+                        let mixedSignal = (lowpassSynth + drumWave) / 128;
                         
-                        output[i] = (((mixedVal | 0) & 255) / 127.5) - 1;
+                        if (mixedSignal > 1) mixedSignal = 1;
+                        if (mixedSignal < -1) mixedSignal = -1;
+                        
+                        output[i] = mixedSignal;
                     }
                 };
                 node.connect(ctx.destination);
