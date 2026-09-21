@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>joke site 🤪</title>
     <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="preconnect" href="https://googleapis.com">
-    <link rel="preconnect" href="https://gstatic.com" crossorigin>
-    <link href="https://googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -69,9 +69,13 @@
             padding: 40px;
             background: rgba(255, 255, 255, 0.03);
             border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(12px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
+            border-left: 1px solid rgba(255, 255, 255, 0.3);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgba(168, 85, 247, 0.15);
             transform: translateY(20px);
             opacity: 0;
             transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.8s ease;
@@ -143,7 +147,7 @@
             let T = 0;
             let n = 20480;
             let b = 1;
-            const scale = [0, 2, 4, 5, 7, 9, 11, 12];
+            const scale =;
             
             node.onaudioprocess = (e) => {
                 const output = e.outputBuffer.getChannelData(0);
@@ -159,7 +163,10 @@
                     let doubleIdx = (t * 2) % l;
                     a[idx] = (T) / 4 % 256 * (1 - (t / n) % 1) + (a[doubleIdx] || 0) * .75;
                     if (isNaN(a[idx])) a[idx] = 0;
-                    const val = a[idx] / 3;
+                    
+                    const fadeInFactor = Math.min(t / 132300, 1);
+                    const val = (a[idx] / 3) * fadeInFactor;
+                    
                     output[i] = (((val | 0) & 255) / 127.5) - 1;
                 }
             };
