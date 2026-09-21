@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>joke site 🤪</title>
     <link rel="icon" type="image/png" href="favicon.png">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://googleapis.com">
+    <link rel="preconnect" href="https://gstatic.com" crossorigin>
+    <link href="https://googleapis.com/css2?family=Ubuntu:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * {
             box-sizing: border-box;
@@ -118,8 +118,7 @@
             <div class="pulse-text">click me to enter</div>
         </div>
     </div>
-<div class="container">
-    <h2>yo doritos soritos 🤣</h2>
+
     <div class="container">
         <h1 class="pulse-text">check the favicon its a femboys coke</h1>
         <div class="content-flex">
@@ -127,7 +126,7 @@
             <span>or whatever is this</span>
         </div>
     </div>
-</div>
+
     <script>
         let ctx;
         const overlay = document.getElementById("click-overlay");
@@ -161,9 +160,19 @@
                         if (isNaN(a[idx])) a[idx] = 0;
                         
                         const fadeInFactor = Math.min(t / 132300, 1);
-                        const val = (a[idx] / 3) * fadeInFactor;
+                        const synthVal = (a[idx] / 3) * fadeInFactor;
                         
-                        output[i] = (((val | 0) & 255) / 127.5) - 1;
+                        const drumInterval = n / 2;
+                        const drumT = t % drumInterval;
+                        const drumDecay = Math.max(0, 1 - (drumT / (drumInterval * 0.8)));
+                        const drumPitch = Math.exp(-drumT / 1200) * 0.25;
+                        const drumWave = Math.sin(drumT * drumPitch) * 45 * drumDecay * fadeInFactor;
+                        
+                        let mixedVal = synthVal + drumWave;
+                        if (mixedVal > 127) mixedVal = 127;
+                        if (mixedVal < -128) mixedVal = -128;
+                        
+                        output[i] = (((mixedVal | 0) & 255) / 127.5) - 1;
                     }
                 };
                 node.connect(ctx.destination);
