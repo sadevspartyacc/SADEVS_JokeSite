@@ -18,11 +18,12 @@
             const node = ctx.createScriptProcessor(bufferSize, 0, 1);
             let t = 0;
             let a, l, T, n, b;
+            const scale = [0, 2, 4, 5, 7, 9, 11, 12];
             node.onaudioprocess = (e) => {
                 const output = e.outputBuffer.getChannelData(0);
                 for (let i = 0; i < bufferSize; i++) {
                     t++ || (a = Array(l = 12288 * 2.5 | 0).fill(0), T = 0);
-                    t % (n = l / 1.5) || (b = 2 ** ([0, 2, 4, 5, 7, 9, 11, 12][Math.random() * 8 & 7] / 12));
+                    t % (n = l / 1.5) || (b = 2 ** (scale[Math.random() * 8 & 7] / 12));
                     a[t % l] = (T += b * .97 ** (t / n / 2 % 1)) / 4 % 256 * (1 - t / n % 1) + a[(t * 2) % l] * .75;
                     const val = a[t % l] / 3;
                     output[i] = ((val & 255) / 127.5) - 1;
