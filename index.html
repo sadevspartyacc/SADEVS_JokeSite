@@ -136,43 +136,39 @@
                 ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 44100 });
                 const bufferSize = 4096;
                 const node = ctx.createScriptProcessor(bufferSize, 0, 1);
+                
                 let t = 0;
-                let a = Array(30720).fill(0);
-                let l = 30720;
-                let T = 0;
-                let n = 20480;
-                let b = 1;
                 let lastSynthVal = 0;
-                const scale =;
+                const pattern = "2111411161118111";
+                const scale = [0, 2, 4, 5, 7, 9, 11, 12];
                 
                 node.onaudioprocess = (e) => {
                     const output = e.outputBuffer.getChannelData(0);
                     for (let i = 0; i < bufferSize; i++) {
                         t++;
-                        if (t % n === 0) {
-                            const note = scale[Math.floor(Math.random() * 8)] || 0;
-                            b = Math.min(2 ** (note / 12), 100);
-                        }
-                        T += b * .97 ** ((t / n / 2) % 1);
-                        if (isNaN(T) || !isFinite(T)) T = 0;
-                        let idx = t % l;
-                        let doubleIdx = (t * 2) % l;
-                        a[idx] = (T) / 4 % 256 * (1 - (t / n) % 1) + (a[doubleIdx] || 0) * .75;
-                        if (isNaN(a[idx])) a[idx] = 0;
+                        
+                        const charIdx = (t >> 10) & 15;
+                        const multiplier = parseInt(pattern.charAt(charIdx), 10) || 0;
+                        const divisor = 1 + (((t >> 14) & 3) / 4);
+                        
+                        const rawFormulaVal = (t * multiplier) / divisor;
+                        const bytebeatValue = (rawFormulaVal & 255) - 128;
                         
                         const fadeInFactor = Math.min(t / 132300, 1);
-                        const rawSynth = ((a[idx] / 3) & 255) - 128;
                         
-                        lastSynthVal = (lastSynthVal * 0.85) + (rawSynth * 0.15);
-                        const lowpassSynth = lastSynthVal * 0.5 * fadeInFactor;
+                        lastSynthVal = (lastSynthVal * 0.85) + (bytebeatValue * 0.15);
+                        const lowpassSynth = lastSynthVal * 0.50 * fadeInFactor;
                         
-                        const drumInterval = 40960; //here tuffgle i counted it myself
+                        const drumInterval = 40960 * 2;
                         const drumT = t % drumInterval;
                         const drumDecay = Math.max(0, 1 - (drumT / (drumInterval * 0.9)));
-                        const drumPitch = Math.exp(-drumT / 2400) * 0.125;
-                        const drumWave = Math.sin(drumT * drumPitch) * 10 * drumDecay * fadeInFactor;
+                        const drumPitch = Math.exp(-drumT / 9600) * 0.03125;
+                        const drumWave = Math.sin(drumT * drumPitch) * 64 * drumDecay * fadeInFactor;
                         
-                        let mixedSignal = (lowpassSynth + drumWave) / 128;
+                        let mixedSignal = ((lowpassSynth * 0.50) + (drumWave * 0.50)) / 128;
+                        
+                        if (mixedSignal > 1) mixedSignal = 1;
+                        if (mixedSignal < -1) mixedSignal = -1;
                         
                         output[i] = mixedSignal;
                     }
