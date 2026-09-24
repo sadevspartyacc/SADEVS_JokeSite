@@ -135,7 +135,7 @@
         
         window.addEventListener("click", () => {
             if (!ctx) {
-                ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 44100 });
+                ctx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 22050 });
                 const bufferSize = 4096;
                 const node = ctx.createScriptProcessor(bufferSize, 0, 1);
                 
